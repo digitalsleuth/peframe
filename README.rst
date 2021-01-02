@@ -97,6 +97,6 @@ Talk about...
 Other
 -----
 
-This version of peframe is currently maintained by `Corey Forman <https://github.com/digitalsleuth/>` and includes the recent and relevant pull requests from the original repo.
+This version of peframe is currently maintained by `Corey Forman <https://github.com/digitalsleuth>`_ and includes the recent and relevant pull requests from the original repo.
 
 The originator of this software is `Gianni \'guelfoweb\' Amato <http://guelfoweb.com>`_, who can be contacted at guelfoweb@gmail.com or twitter `@guelfoweb <http://twitter.com/guelfoweb>`_. Suggestions and criticism are welcome.
