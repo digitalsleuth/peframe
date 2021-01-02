@@ -13,11 +13,11 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(
-    name='peframe',
+    name='peframe-ds',
     version='6.1.0',
-    description='peframe is a open source tool to perform static analysis on Portable Executable malware and malicious MS Office documents.',
-    url='https://github.com/guelfoweb/peframe',
-
+    description='peframe is an open source tool to perform static analysis on Portable Executable malware and malicious MS Office documents.',
+    url='https://github.com/digitalsleuth/peframe',
+    maintainer='Corey Forman',
     author='Gianni \'guelfoweb\' Amato',
     author_email='guelfoweb@gmail.com',
 
@@ -29,7 +29,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Production/Stable',
+        'Development Status :: 5 - Production/Stable',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -43,6 +43,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         ],
 
     keywords='peframe',
