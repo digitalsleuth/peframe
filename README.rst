@@ -7,41 +7,40 @@ peframe is a open source tool to perform static analysis on `Portable Executable
 .. image:: https://www.paypalobjects.com/en_US/IT/i/btn/btn_donateCC_LG.gif
    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LWNAWQ9G6APU2
 
-Install
--------
+Prerequisites
 
-**Download**
+The following prerequisites are necessary before you can install and use peframe.
 
 .. code-block::
 
-   sudo apt install git
-   git clone https://github.com/guelfoweb/peframe.git
-   cd peframe
+    python >= 3.6.6
+    python3-pip
+    libssl-dev
+    swig
+
+Install Methods
+-------
+
+**Manual Download and Install**
+
+.. code-block::
+
+    sudo apt install git
+    git clone https://github.com/digitalsleuth/peframe.git
+    cd peframe
    
 **Installation script for Ubuntu**
 
 .. code-block::
 
-   sudo bash install.sh
-
-**Installation (prerequisites required)**
-
-.. code-block::
-
+    sudo bash install.sh
     sudo python3 setup.py install
 
-
-**Prerequisites**
-
-The following prerequisites are required to be installed on your system before you can install and use peframe.
+**One-step Install**
 
 .. code-block::
 
-    python >= 3.6.6
-    pyton3-pip
-    libssl-dev
-    swig
-
+   sudo python3 -m pip install git+https://github.com/digitalsleuth/peframe.git
 
 Usage
 -----
@@ -62,7 +61,7 @@ peframe -h
 You can edit "config-peframe.json" file in "config" folder to configure virustotal API key. After installation you can use "peframe -h" to find api_config path.
 
 
-How to work
+How it works
 -----------
 
 **MS Office (macro) document analysis with peframe 6.0.1**
@@ -98,4 +97,6 @@ Talk about...
 Other
 -----
 
-This tool is currently maintained by `Gianni 'guelfoweb' Amato <http://guelfoweb.com/>`_, who can be contacted at guelfoweb@gmail.com or twitter `@guelfoweb <http://twitter.com/guelfoweb>`_. Suggestions and criticism are welcome.
+This version of peframe is currently maintained by `Corey Forman <https://github.com/digitalsleuth/>` and includes the recent and relevant pull requests from the original repo.
+
+The originator of this software is `Gianni \'guelfoweb\' Amato <http://guelfoweb.com>`_, who can be contacted at guelfoweb@gmail.com or twitter `@guelfoweb <http://twitter.com/guelfoweb>`_. Suggestions and criticism are welcome.

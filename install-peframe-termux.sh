@@ -4,7 +4,7 @@
 # This file is part of peframe https://github.com/guelfoweb/peframe/
 # ----------------------------------------------------------------------
 
-peframe_version="6.0.3"
+peframe_version="6.1.0"
 environment_test="Termux Android"
 
 echo "Installation script peframe $peframe_version"
