@@ -1,5 +1,5 @@
 =======
-peframe
+peframe (peframe-ds on pypi)
 =======
 
 peframe is an open source tool to perform static analysis on `Portable Executable <http://en.wikipedia.org/wiki/Portable_Executable>`_ malware and generic suspicious files. It can help malware researchers to detect packers, xor, digital signatures, mutex, anti-debug, anti-virtual machine, suspicious sections and functions, macros and much more.
@@ -42,6 +42,11 @@ Install Methods
 
    sudo python3 -m pip install git+https://github.com/digitalsleuth/peframe.git
 
+OR
+
+.. code-block::
+
+   sudo python3 -m pip install peframe-ds
 Usage
 -----
 
