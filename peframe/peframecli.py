@@ -25,6 +25,8 @@ else:
     from peframe.modules import virustotal
     from peframe.modules import features
 
+import os
+
 # TODO
 # [ ] get_data_by_offset
 
@@ -52,6 +54,10 @@ def interactive_mode(result, cmd_list, cmd_list_select):
         elif user_input in drop_list:
             print('goodbye!\n')
             return 0
+
+        # clear
+        elif user_input == 'clear':
+            os.system('cls' if os.name == 'nt' else 'clear')
 
         # info
         elif user_input == 'info':
@@ -215,7 +221,7 @@ def show_config():
 
 
 def get_info(result):
-    cmd_list = ['info', 'exit', 'virustotal']
+    cmd_list = ['info', 'exit', 'clear', 'virustotal']
     cmd_list_select = {}
     header('File Information (time: ' + str(result['time']) + ')')
     print("filename".ljust(ALIGN, ' '), os.path.basename(result['filename']))
