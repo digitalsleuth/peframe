@@ -4,6 +4,7 @@
 import json
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
+
 def get_result(API_KEY, HASH, full=False):
     vt = VirusTotalPublicApi(API_KEY)
     response = vt.get_file_report(HASH)
@@ -11,11 +12,8 @@ def get_result(API_KEY, HASH, full=False):
         return response
     try:
         return {
-                "positives": response['results']['positives'], 
-                "total": response['results']['total']
-                }
+            "positives": response["results"]["positives"],
+            "total": response["results"]["total"],
+        }
     except:
-        return {
-                "positives": "", 
-                "total": ""
-                }
+        return {"positives": "", "total": ""}

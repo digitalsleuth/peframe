@@ -15,6 +15,9 @@ The following prerequisites are necessary before you can install and use peframe
 
     python >= 3.6.6
     python3-pip
+    python3-dev
+    build-essential
+    libmagic-dev
     libssl-dev
     swig
 

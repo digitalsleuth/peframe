@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 
 from setuptools import setup
-from codecs import open  # To use a consistent encoding
+from codecs import open
 from os import path
 
 with open('requirements.txt') as f:
@@ -14,40 +14,29 @@ with open('requirements.txt') as f:
 
 setup(
     name='peframe-ds',
-    version='6.1.0',
+    version='6.2.0',
     description='peframe is an open source tool to perform static analysis on Portable Executable malware and malicious MS Office documents.',
     url='https://github.com/digitalsleuth/peframe',
     maintainer='Corey Forman',
     author='Gianni \'guelfoweb\' Amato',
     author_email='guelfoweb@gmail.com',
-
-    license='GNU',
-
-    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    license='GNU General Public License',
     classifiers=[
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
         'Development Status :: 5 - Production/Stable',
-
-        # Indicate who your project is intended for
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
-
-        # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: GNU General Public License (GPL)',
-
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         ],
 
     keywords='peframe',
-
     packages=["peframe", "peframe.modules"],
     package_data={
         'peframe': [
@@ -57,11 +46,9 @@ setup(
             'signatures/yara_plugins/pdf/*.yar',
             'signatures/yara_plugins/pe/*.yar',
             'signatures/yara_plugins/pe/*.yara',
-            ], 
+            ],
     },
-
     install_requires=required,
-
     entry_points={
         'console_scripts': [
             'peframe=peframe.peframecli:main',

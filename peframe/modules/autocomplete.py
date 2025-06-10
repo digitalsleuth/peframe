@@ -5,6 +5,7 @@
 
 import readline
 
+
 class MyCompleter(object):  # Custom completer
 
     def __init__(self, cmd_list):
@@ -13,13 +14,12 @@ class MyCompleter(object):  # Custom completer
     def complete(self, text, state):
         if state == 0:  # on first trigger, build possible matches
             if text:  # cache matches (entries that start with entered text)
-                self.matches = [s for s in self.cmd_list 
-                                                if s and s.startswith(text)]
+                self.matches = [s for s in self.cmd_list if s and s.startswith(text)]
             else:  # no text entered, all matches possible
                 self.matches = self.cmd_list[:]
 
         # return match indexed by state
-        try: 
+        try:
             return self.matches[state]
         except IndexError:
             return None
@@ -28,12 +28,12 @@ class MyCompleter(object):  # Custom completer
 def get_result(cmd_list, prompt_text):
     completer = MyCompleter(cmd_list)
     readline.set_completer(completer.complete)
-    readline.set_completer_delims(' \t\n;')
-    readline.parse_and_bind('tab: complete')
+    readline.set_completer_delims(" \t\n;")
+    readline.parse_and_bind("tab: complete")
 
     for cmd in cmd_list:
         readline.add_history(cmd)
 
-    raw = input(prompt_text+' ')
+    raw = input(prompt_text + " ")
 
     return raw
