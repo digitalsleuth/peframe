@@ -31,14 +31,8 @@ Install Methods
     sudo apt install git
     git clone https://github.com/digitalsleuth/peframe.git
     cd peframe
+    sudo python3 -m pip install .
    
-**Installation script for Ubuntu**
-
-.. code-block::
-
-    sudo bash install.sh
-    sudo python3 setup.py install
-
 **One-step Install**
 
 .. code-block::
@@ -50,6 +44,7 @@ OR
 .. code-block::
 
    sudo python3 -m pip install peframe-ds
+
 Usage
 -----
 
