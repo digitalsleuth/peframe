@@ -27,7 +27,7 @@ maintainers = [
   {name = "Corey Forman (digitalsleuth)", email = "github@digitalsleuth.ca"}
 ]
 description = "peframe is an open source tool to perform static analysis on Portable Executable malware and malicious MS Office documents."
-readme = "README.rst"
+readme = "README.md"
 keywords = ["digital forensics", "dfir", "peframe", "portable executable", "malware", "office"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
