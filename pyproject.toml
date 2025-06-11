@@ -9,7 +9,7 @@ exclude = ["debian*", "binaries*", "build*", "dist*"]
 peframe = ['config/config-peframe.json','signatures/stringsmatch.json','signatures/yara_plugins/doc/*.yar','signatures/yara_plugins/pdf/*.yar','signatures/yara_plugins/pe/*.yar','signatures/yara_plugins/pe/*.yara']
 
 [project]
-name = "peframe"
+name = "peframe-ds"
 version = "6.2.0"
 dependencies = [
     "pefile",
@@ -31,7 +31,6 @@ readme = "README.rst"
 keywords = ["digital forensics", "dfir", "peframe", "portable executable", "malware", "office"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "License :: OSI Approved :: GNU General Public License (GPL)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.6",
   "Programming Language :: Python :: 3.7",
