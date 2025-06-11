@@ -23,7 +23,7 @@ libssl-dev
 swig
 ```
 
-Install Methods \-\-\-\-\-\--
+**Install Methods**
 
 **Manual Download and Install**
 
@@ -65,7 +65,7 @@ You can edit \"config-peframe.json\" file in \"config\" folder to
 configure virustotal API key. After installation you can use \"peframe
 -h\" to find api\_config path.
 
-How it works \-\-\-\-\-\-\-\-\-\--
+**How it works**
 
 **MS Office (macro) document analysis with peframe 6.0.1**
 
