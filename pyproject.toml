@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools >= 77.0.30"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["debian*", "binaries*", "build*", "dist*"]
+
+[tool.setuptools.package-data]
+peframe = ['config/config-peframe.json','signatures/stringsmatch.json','signatures/yara_plugins/doc/*.yar','signatures/yara_plugins/pdf/*.yar','signatures/yara_plugins/pe/*.yar','signatures/yara_plugins/pe/*.yara']
+
+[project]
+name = "peframe-ds"
+version = "6.2.0"
+dependencies = [
+    "pefile",
+    "python-magic",
+    "yara-python",
+    "virustotal-api",
+    "oletools",
+    "M2Crypto"
+]
+requires-python = ">=3.8"
+authors = [
+  {name = "Gianni guelfoweb Amato and Corey Forman (digitalsleuth)", email = "github@digitalsleuth.ca"}
+]
+maintainers = [
+  {name = "Corey Forman (digitalsleuth)", email = "github@digitalsleuth.ca"}
+]
+description = "peframe is an open source tool to perform static analysis on Portable Executable malware and malicious MS Office documents."
+readme = "README.md"
+keywords = ["digital forensics", "dfir", "peframe", "portable executable", "malware", "office"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/digitalsleuth/peframe"
+
+[project.scripts]
+peframe = "peframe.peframecli:main"
