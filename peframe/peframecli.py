@@ -7,7 +7,6 @@ import os
 import sys
 from datetime import datetime as dt, timezone
 import json
-#import readline
 import argparse
 from argparse import RawTextHelpFormatter
 
@@ -100,7 +99,7 @@ def interactive_mode(result, cmd_list, cmd_list_select):
                                 json.dumps(
                                     cmd_list_select["virustotal"], sort_keys=True, indent=4
                                 )
-                            )                            
+                            )
                         if user_input_virustotal == "permalink":
                             print(
                                 f'https://www.virustotal.com/gui/file/{vt["data"]["attributes"]["sha256"]}'
@@ -506,7 +505,7 @@ def main():
 
     if args.interactive:
         sys.exit(interactive_mode(result, cmd_list, cmd_list_select))
-        
+
     if result["yara_plugins"]:
         header("Yara Plugins")
         for item in result["yara_plugins"]:

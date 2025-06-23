@@ -13,6 +13,7 @@ name = "peframe-ds"
 version = "7.0.0"
 dependencies = [
     "pefile",
+    "requests",
     "readline ; platform_system != 'Windows'",
     "pyreadline3 ; platform_system == 'Windows'",
     "python-magic-bin ; platform_system == 'Windows'",
