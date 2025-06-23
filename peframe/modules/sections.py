@@ -47,7 +47,7 @@ def get_result(pe):
                     "sha256": section.get_hash_sha256(),
                 },
                 "entropy": section.get_entropy(),
-                "data": str(section.get_data())[:50],  # .rstrip(b'\x00'))
+                "data": str(section.get_data())[:50],
             }
         )
 

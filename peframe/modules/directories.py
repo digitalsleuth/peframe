@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
+import binascii
 import pefile
+#import M2Crypto
+from cryptography.hazmat.primitives.serialization import pkcs7
+from cryptography.hazmat.primitives import hashes
+from cryptography.x509 import Certificate
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.backends import default_backend
 
 
 def get_import(pe):
@@ -16,7 +24,7 @@ def get_import(pe):
             try:
                 function = imp.name.decode("ascii")
             except:
-                function = str(imp.name)  # .decode('ascii')
+                function = str(imp.name)
             else:
                 pass
 
@@ -66,8 +74,7 @@ def get_debug(pe):
     for d in pe.OPTIONAL_HEADER.DATA_DIRECTORY:
         if d.name == "IMAGE_DIRECTORY_ENTRY_DEBUG":
             break
-
-    if not d or d.name != "IMAGE_DIRECTORY_ENTRY_DEBUG":
+    else:
         return result
 
     debug_directories = pe.parse_debug_directory(d.VirtualAddress, d.Size)
@@ -88,8 +95,7 @@ def get_relocations(pe):
     for d in pe.OPTIONAL_HEADER.DATA_DIRECTORY:
         if d.name == "IMAGE_DIRECTORY_ENTRY_BASERELOC":
             break
-
-    if not d or d.name != "IMAGE_DIRECTORY_ENTRY_BASERELOC":
+    else:
         return result
 
     result.update({"VirtualAddress": d.VirtualAddress, "Size": d.Size})
@@ -99,7 +105,7 @@ def get_relocations(pe):
     my_items = {}
     for items in reloc_directories:
         i = i + 1
-        for item in items.entries:
+        for _ in items.entries:
             my_items.update({"reloc_" + str(i): len(items.entries)})
     result.update({"details": my_items})
     return result
@@ -110,19 +116,18 @@ def get_tls(pe):
     for d in pe.OPTIONAL_HEADER.DATA_DIRECTORY:
         if d.name == "IMAGE_DIRECTORY_ENTRY_TLS":
             break
-
-    if not d or d.name != "IMAGE_DIRECTORY_ENTRY_TLS":
+    else:
         return result
 
     tls_directories = pe.parse_directory_tls(d.VirtualAddress, d.Size).struct
     """
 	[IMAGE_TLS_DIRECTORY]
-	0x0        0x0   StartAddressOfRawData:         0x905A4D  
-	0x4        0x4   EndAddressOfRawData:           0x3       
-	0x8        0x8   AddressOfIndex:                0x4       
-	0xC        0xC   AddressOfCallBacks:            0xFFFF    
-	0x10       0x10  SizeOfZeroFill:                0xB8      
-	0x14       0x14  Characteristics:               0x0 
+	0x0        0x0   StartAddressOfRawData:         0x905A4D
+	0x4        0x4   EndAddressOfRawData:           0x3
+	0x8        0x8   AddressOfIndex:                0x4
+	0xC        0xC   AddressOfCallBacks:            0xFFFF
+	0x10       0x10  SizeOfZeroFill:                0xB8
+	0x14       0x14  Characteristics:               0x0
 	"""
     result.update(
         {
@@ -138,15 +143,11 @@ def get_tls(pe):
     return result
 
 
-import re
-import binascii
-
-
 def get_resources(pe):
     res_array = []
     try:
         """
-        # resource types					# description
+        # resource types					        # description
         RT_CURSOR = 1						# Hardware-dependent cursor resource.
         RT_BITMAP = 2						# Bitmap resource.
         RT_ICON = 3							# Hardware-dependent icon resource.
@@ -157,26 +158,26 @@ def get_resources(pe):
         RT_FONT = 8							# Font resource.
         RT_ACCELERATOR = 9					# Accelerator table.
         RT_RCDATA = 10						# Application-defined resource (raw data.)
-        RT_MESSAGETABLE = 11				# Message-table entry.
+        RT_MESSAGETABLE = 11				        # Message-table entry.
         RT_VERSION = 16						# Version resource.
         RT_DLGINCLUDE = 17					# Allows a resource editing tool to associate a string with an .rc file.
-        RT_PLUGPLAY = 19					# Plug and Play resource.
+        RT_PLUGPLAY = 19					        # Plug and Play resource.
         RT_VXD = 20							# VXD.
         RT_ANICURSOR = 21					# Animated cursor.
         RT_ANIICON = 22						# Animated icon.
-        RT_HTML = 23						# HTML resource.
-        RT_MANIFEST = 24					# Side-by-Side Assembly Manifest.
+        RT_HTML = 23						        # HTML resource.
+        RT_MANIFEST = 24					        # Side-by-Side Assembly Manifest.
 
         RT_GROUP_CURSOR = RT_CURSOR + 11	# Hardware-independent cursor resource.
-        RT_GROUP_ICON = RT_ICON + 11		# Hardware-independent icon resource.
+        RT_GROUP_ICON = RT_ICON + 11		        # Hardware-independent icon resource.
         """
         for resource_type in pe.DIRECTORY_ENTRY_RESOURCE.entries:
             if resource_type.name is not None:
-                name = "%s" % resource_type.name
+                name = f"{resource_type.name}"
             else:
-                name = "%s" % pefile.RESOURCE_TYPE.get(resource_type.struct.Id)
-            if name == None:
-                name = "%d" % resource_type.struct.Id
+                name = f"{pefile.RESOURCE_TYPE.get(resource_type.struct.Id)}"
+            if name is None:
+                name = f"{resource_type.struct.Id}"
 
             if hasattr(resource_type, "directory"):
                 i = 0
@@ -221,91 +222,130 @@ def magic_check(data):
     return re.findall(r"4d5a90", str(binascii.b2a_hex(data)))
 
 
-import M2Crypto
-
-
 def get_sign(pe):
     result = {}
 
-    cert_address = pe.OPTIONAL_HEADER.DATA_DIRECTORY[
+    cert_entry = pe.OPTIONAL_HEADER.DATA_DIRECTORY[
         pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_SECURITY"]
-    ].VirtualAddress
-    cert_size = pe.OPTIONAL_HEADER.DATA_DIRECTORY[
-        pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_SECURITY"]
-    ].Size
+    ]
+    cert_address = cert_entry.VirtualAddress
+    cert_size = cert_entry.Size
 
     if cert_address != 0 and cert_size != 0:
         signature = pe.write()[cert_address + 8 :]
+        try:
+            pkcs7_obj = pkcs7.load_der_pkcs7_signed_data(cert_data)
+        except Exception as e:
+            return {
+                "virtual_address": cert_address,
+                "block_size": cert_size,
+                "error": f"Failed to parse PKCS7: {str(e)}"
+            }
         details = {}
-
-        bio = M2Crypto.BIO.MemoryBuffer(bytes(signature))
-        if bio:
-            pkcs7_obj = M2Crypto.m2.pkcs7_read_bio_der(bio.bio_ptr())
-            if pkcs7_obj:
-                p7 = M2Crypto.SMIME.PKCS7(pkcs7_obj)
-                for cert in p7.get0_signers(M2Crypto.X509.X509_Stack()) or []:
-                    subject = cert.get_subject()
-
-                    try:
-                        serial_number = "%032x" % cert.get_serial_number()
-                    except:
-                        serial_number = ""
-                    try:
-                        common_name = subject.CN
-                    except:
-                        common_name = ""
-                    try:
-                        country = subject.C
-                    except:
-                        country = ""
-                    try:
-                        locality = subject.L
-                    except:
-                        locality = ""
-                    try:
-                        organization = subject.O
-                    except:
-                        organization = ""
-                    try:
-                        email = subject.Email
-                    except:
-                        email = ""
-                    try:
-                        valid_from = cert.get_not_before()
-                    except:
-                        valid_from = ""
-                    try:
-                        valid_to = cert.get_not_after()
-                    except:
-                        valid_to = ""
-                    details.update(
-                        {
-                            "serial_number": str(serial_number),
-                            "common_name": str(common_name),
-                            "country": str(country),
-                            "locality": str(locality),
-                            "organization": str(organization),
-                            "email": str(email),
-                            "valid_from": str(valid_from),
-                            "valid_to": str(valid_to),
-                            "hash": {
-                                "sha1": "%040x" % int(cert.get_fingerprint("sha1"), 16),
-                                "md5": "%032x" % int(cert.get_fingerprint("md5"), 16),
-                                "sha256": "%064x"
-                                % int(cert.get_fingerprint("sha256"), 16),
-                            },
-                        }
-                    )
-
-        result.update(
-            {
+        for cert in pkcs7_obj.certificates:
+            if not isinstance(cert, Certificate):
+                continue
+    
+            subject = cert.subject
+            serial_number = f"{cert.serial_number:032x}"
+    
+            def get_attr(oid_name):
+                try:
+                    return subject.get_attributes_for_oid(oid_name)[0].value
+                except IndexError:
+                    return ""
+            details.update({
+                    "serial_number": serial_number,
+                    "common_name": get_attr(NameOID.COMMON_NAME),
+                    "country": get_attr(NameOID.COUNTRY_NAME),
+                    "locality": get_attr(NameOID.LOCALITY_NAME),
+                    "organization": get_attr(NameOID.ORGANIZATION_NAME),
+                    "email": get_attr(NameOID.EMAIL_ADDRESS),
+                    "valid_from": str(cert.not_valid_before),
+                    "valid_to": str(cert.not_valid_after),
+                    "hash": {
+                        "sha1": cert.fingerprint(hashes.SHA1()).hex(),
+                        "md5": cert.fingerprint(hashes.MD5()).hex(),
+                        "sha256": cert.fingerprint(hashes.SHA256()).hex(),
+                        },
+                })
+            break
+    
+        result.update({
                 "virtual_address": cert_address,
                 "block_size": cert_size,
                 "details": details,
-            }
-        )
+            })
+    
+        return result
 
-    return result
+        #bio = M2Crypto.BIO.MemoryBuffer(bytes(signature))
+        #if bio:
+            #pkcs7_obj = M2Crypto.m2.pkcs7_read_bio_der(bio.bio_ptr())
+            #if pkcs7_obj:
+                #p7 = M2Crypto.SMIME.PKCS7(pkcs7_obj)
+                #for cert in p7.get0_signers(M2Crypto.X509.X509_Stack()) or []:
+                    #subject = cert.get_subject()
+
+                    #try:
+                        #serial_number = f"{cert.get_serial_number():032x}"
+                    #except:
+                        #serial_number = ""
+                    #try:
+                        #common_name = subject.CN
+                    #except:
+                        #common_name = ""
+                    #try:
+                        #country = subject.C
+                    #except:
+                        #country = ""
+                    #try:
+                        #locality = subject.L
+                    #except:
+                        #locality = ""
+                    #try:
+                        #organization = subject.O
+                    #except:
+                        #organization = ""
+                    #try:
+                        #email = subject.Email
+                    #except:
+                        #email = ""
+                    #try:
+                        #valid_from = cert.get_not_before()
+                    #except:
+                        #valid_from = ""
+                    #try:
+                        #valid_to = cert.get_not_after()
+                    #except:
+                        #valid_to = ""
+                    #details.update(
+                        #{
+                            #"serial_number": str(serial_number),
+                            #"common_name": str(common_name),
+                            #"country": str(country),
+                            #"locality": str(locality),
+                            #"organization": str(organization),
+                            #"email": str(email),
+                            #"valid_from": str(valid_from),
+                            #"valid_to": str(valid_to),
+                            #"hash": {
+                                #"sha1": f'{int(cert.get_fingerprint("sha1"), 16):040x}',
+                                #"md5": f'{int(cert.get_fingerprint("md5"), 16):032x}',
+                                #"sha256": f'{int(cert.get_fingerprint("sha256"), 16):064x}',
+                            #},
+                        #}
+                    #)
+
+        #result.update(
+            #{
+                #"virtual_address": cert_address,
+                #"block_size": cert_size,
+                #"details": details,
+            #}
+        #)
+
+    #return result
 
 
 def get(pe):

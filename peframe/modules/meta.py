@@ -12,8 +12,7 @@ def convert_char(char):
         or char in string.whitespace
     ):
         return char
-    else:
-        return r"\x%02x" % ord(char)
+    return f"\\x{ord(char):02x}"
 
 
 def convert_to_printable(s):

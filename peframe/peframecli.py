@@ -5,8 +5,9 @@
 
 import os
 import sys
+from datetime import datetime as dt, timezone
 import json
-import readline
+#import readline
 import argparse
 from argparse import RawTextHelpFormatter
 
@@ -25,26 +26,23 @@ else:
     from peframe.modules import virustotal
     from peframe.modules import features
 
-
-# TODO
-# [ ] get_data_by_offset
-
 __version__ = peframe.version()
 ALIGN = 16
 
 
 def header(title):
-    print(f"\n{''.ljust(80, '-')}{title}{''.ljust(80, '-')}")
+    total = 106
+    spacers = (total - len(title)) // 2
+    print(f"\n{''.ljust(spacers, '-')} {title} {''.ljust(spacers, '-')}")
 
 
 def interactive_mode(result, cmd_list, cmd_list_select):
     header("Interactive mode (press TAB to show commands)")
     help_list = ["?", "h", "help", "ls", "dir"]
     drop_list = ["q!", "exit", "quit", "bye"]
+    back_list = ["back", "cd .."]
     while 1:
-        user_input = autocomplete.get_result(
-            cmd_list, "[peframe]>"
-        )  # input ("[peframe]> ")
+        user_input = autocomplete.get_result(cmd_list, "[peframe]>")
 
         if user_input in help_list:
             print(json.dumps(cmd_list, sort_keys=True, indent=4))
@@ -53,7 +51,7 @@ def interactive_mode(result, cmd_list, cmd_list_select):
             return 0
 
         # clear
-        elif user_input in ("clear", "cls"):
+        elif user_input in {"clear", "cls"}:
             os.system("cls" if os.name == "nt" else "clear")
 
         # info
@@ -84,42 +82,66 @@ def interactive_mode(result, cmd_list, cmd_list_select):
                     result["hashes"]["md5"],
                     full=True,
                 )
-                if vt["response_code"] == 200:
+                if "error" not in vt:
                     print(
                         json.dumps(
                             cmd_list_select["virustotal"], sort_keys=True, indent=4
                         )
                     )
-                    print("\nUse 'back' to return")
+                    print(f"\nUse {back_list} to return")
                     while 1:
                         user_input_virustotal = autocomplete.get_result(
                             cmd_list_select["virustotal"], "[peframe/virustotal]>"
                         )
-                        if user_input_virustotal == "back":
+                        if user_input_virustotal in back_list:
                             break
-                        if user_input_virustotal == "permalink":
-                            print(vt["results"]["permalink"])
-                        elif user_input_virustotal == "antivirus":
+                        if user_input_virustotal in help_list:
                             print(
                                 json.dumps(
-                                    vt["results"]["scans"], sort_keys=True, indent=4
+                                    cmd_list_select["virustotal"], sort_keys=True, indent=4
                                 )
+                            )                            
+                        if user_input_virustotal == "permalink":
+                            print(
+                                f'https://www.virustotal.com/gui/file/{vt["data"]["attributes"]["sha256"]}'
                             )
+                        elif user_input_virustotal == "antivirus":
+                            sorted_data = {
+                                k: dict(sorted(v.items()))
+                                for k, v in sorted(
+                                    vt["data"]["attributes"][
+                                        "last_analysis_results"
+                                    ].items(),
+                                    key=lambda item: item[0].lower(),
+                                )
+                            }
+                            print(json.dumps(sorted_data, indent=4))
                         elif user_input_virustotal == "scan_date":
-                            print(vt["results"]["scan_date"])
+                            scan_date = dt.fromtimestamp(
+                                vt["data"]["attributes"]["last_analysis_date"],
+                                tz=timezone.utc,
+                            ).strftime("%Y-%m-%d %H:%M:%S %Z")
+                            print(scan_date)
+                        elif user_input_virustotal in drop_list:
+                            print("goodbye!\n")
+                            return 0
+                else:
+                    print(vt["error"]["message"])
             except:
                 print("VT Query error")
 
         # directories
         elif user_input == "directories":
             print(json.dumps(cmd_list_select["directories"], sort_keys=True, indent=4))
-            print("\nUse 'back' to return")
+            print(f"\nUse {back_list} to return")
             while 1:
                 user_input_directories = autocomplete.get_result(
                     cmd_list_select["directories"], "[peframe/directories]>"
                 )
-                if user_input_directories == "back":
+                if user_input_directories in back_list:
                     break
+                if user_input_directories in help_list:
+                    print(json.dumps(cmd_list_select["directories"], sort_keys=True, indent=4))
                 if user_input_directories == "list":
                     for item in user_input_directories["directories"]:
                         print(item)
@@ -179,32 +201,42 @@ def interactive_mode(result, cmd_list, cmd_list_select):
                             indent=4,
                         )
                     )
+                elif user_input_directories in drop_list:
+                    print("goodbye!\n")
+                    return 0
 
         # sections
         elif user_input == "sections":
             print(json.dumps(cmd_list_select["sections"], sort_keys=True, indent=4))
-            print("\nUse 'back' to return")
+            print(f"\nUse {back_list} to return")
             while 1:
                 user_input_sections = autocomplete.get_result(
                     cmd_list_select["sections"], "[peframe/sections]>"
                 )
-                if user_input_sections == "back":
+                if user_input_sections in back_list:
                     break
+                if user_input_sections in help_list:
+                    print(json.dumps(cmd_list_select["sections"], sort_keys=True, indent=4))
                 if user_input_sections in cmd_list_select["sections"]:
                     for item in result["peinfo"]["sections"]["details"]:
                         if item["section_name"] == user_input_sections:
                             print(json.dumps(item, sort_keys=True, indent=4))
+                elif user_input_sections in drop_list:
+                    print("goodbye!\n")
+                    return 0
 
         # features
         elif user_input == "features":
             print(json.dumps(cmd_list_select["features"], sort_keys=True, indent=4))
-            print("\nUse 'back' to return")
+            print(f"\nUse {back_list} to return")
             while 1:
                 user_input_features = autocomplete.get_result(
                     cmd_list_select["features"], "[peframe/features]>"
                 )
-                if user_input_features == "back":
+                if user_input_features in back_list:
                     break
+                if user_input_features in help_list:
+                    print(json.dumps(cmd_list_select["features"], sort_keys=True, indent=4))
                 if user_input_features == "antidbg":
                     print(
                         json.dumps(
@@ -253,6 +285,9 @@ def interactive_mode(result, cmd_list, cmd_list_select):
                             indent=4,
                         )
                     )
+                elif user_input_features in drop_list:
+                    print("goodbye!\n")
+                    return 0
 
         elif user_input == "breakpoint":
             print(json.dumps(result["peinfo"]["breakpoint"], sort_keys=True, indent=4))
@@ -268,13 +303,15 @@ def interactive_mode(result, cmd_list, cmd_list_select):
         # Strings
         elif user_input == "strings":
             print(json.dumps(cmd_list_select["strings"], sort_keys=True, indent=4))
-            print("\nUse 'back' to return")
+            print(f"\nUse {back_list} to return")
             while 1:
                 user_input_strings = autocomplete.get_result(
                     cmd_list_select["strings"], "[peframe/strings]>"
                 )
-                if user_input_strings == "back":
+                if user_input_strings in back_list:
                     break
+                if user_input_strings in help_list:
+                    print(json.dumps(cmd_list_select["strings"], sort_keys=True, indent=4))
                 if user_input_strings == "list":
                     for item in cmd_list_select["strings"]:
                         print(item)
@@ -286,6 +323,9 @@ def interactive_mode(result, cmd_list, cmd_list_select):
                             indent=4,
                         )
                     )
+                elif user_input_strings in drop_list:
+                    print("goodbye!\n")
+                    return 0
 
 
 def show_config():
@@ -293,28 +333,28 @@ def show_config():
     string_match = peframe.files_to_edit()["string_match"]
     yara_plugins = peframe.files_to_edit()["yara_plugins"]
     intro = "Path(s) to configuration file(s):"
-    message = f"\napi_config: {api_config}\nstring_match: {string_match}\nyara_plugins: {yara_plugins}"
+    message = f"{intro}\napi_config: {api_config}\nstring_match: {string_match}\nyara_plugins: {yara_plugins}"
     return message
 
 
 def get_info(result):
-    cmd_list = ["info", "exit", "clear", "cls", "virustotal"]
+    cmd_list = ["info", "exit", "clear", "cls"]
     cmd_list_select = {}
     header(f"File Information (time: {str(result['time'])})")
-    print("filename".ljust(ALIGN, " "), os.path.basename(result["filename"]))
+    print("filename".ljust(ALIGN, " "), os.path.normpath(result["filename"]))
     print("filetype".ljust(ALIGN, " "), result["filetype"][0:63])
     print("filesize".ljust(ALIGN, " "), result["filesize"])
-    print("hash sha256".ljust(ALIGN, " "), result["hashes"]["sha256"])
+    print("md5".ljust(ALIGN, " "), result["hashes"]["md5"])
+    print("sha1".ljust(ALIGN, " "), result["hashes"]["sha1"])
+    print("sha256".ljust(ALIGN, " "), result["hashes"]["sha256"])
     cmd_list.append("hashes")
-
-    print(
-        "virustotal".ljust(ALIGN, " "),
-        str(result["virustotal"]["positives"])
-        + "/"
-        + str(result["virustotal"]["total"]),
-    )
-    cmd_list_select.update({"virustotal": ["permalink", "antivirus", "scan_date"]})
-
+    if "error" in result["virustotal"]:
+        vt_output = result["virustotal"]["error"]["message"]
+    else:
+        vt_output = f'{str(result["virustotal"]["positives"])}/{str(result["virustotal"]["total"])}'
+        cmd_list.append("virustotal")
+        cmd_list_select.update({"virustotal": ["permalink", "antivirus", "scan_date"]})
+    print("virustotal".ljust(ALIGN, " "), vt_output)
     # peinfo
     if result["peinfo"]:
         if hex(result["peinfo"]["imagebase"]) == "0x400000":
@@ -414,7 +454,7 @@ def main():
 
     parser.add_argument("file", help="sample to analyze")
     parser.add_argument(
-        "-v", "--version", action="version", version="%(prog)s " + str(__version__)
+        "-v", "--version", action="version", version=f"%(prog)s {str(__version__)}"
     )
     parser.add_argument(
         "-i",
@@ -452,21 +492,21 @@ def main():
                 indent=4,
             )
         )
-        return 1
+        sys.exit(0)
 
     if args.json:
         print(json.dumps(result, sort_keys=True, indent=4))
-        return 1
+        sys.exit(0)
 
     if args.strings:
         print("\n".join(result["strings"]["dump"]))
-        return 1
+        sys.exit(0)
 
     cmd_list, cmd_list_select = get_info(result)
 
     if args.interactive:
-        return interactive_mode(result, cmd_list, cmd_list_select)
-
+        sys.exit(interactive_mode(result, cmd_list, cmd_list_select))
+        
     if result["yara_plugins"]:
         header("Yara Plugins")
         for item in result["yara_plugins"]:
