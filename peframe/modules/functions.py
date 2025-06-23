@@ -11,7 +11,7 @@ def path_to_file(filename, folder):
 
 
 def load_config(config_file):
-    with open(config_file) as conf:
+    with open(config_file, encoding="utf-8") as conf:
         data = json.load(conf)
     return data
 

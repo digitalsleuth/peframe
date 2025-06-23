@@ -3,11 +3,7 @@
 
 import os
 import json
-import pefile
-
 import array
-import binascii
-
 from . import apialert
 from . import yara_check
 
@@ -18,15 +14,17 @@ def xor_delta(s, key_len=1):
     for x in range(key_len, len(s)):
         delta[x - key_len] ^= delta[x]
 
-    """ return the delta as a string """
     return delta.tobytes()[:-key_len]
 
 
 def get_xor(filename, search_string=False):
     xorsearch_custom = False
+    search_file = None
+    data = None
     check = {}
     offset_list = []
-    search_file = open(filename, "rb").read()
+    with open(filename, "rb") as source:
+        search_file = source.read()
     key_lengths = [1, 2, 4, 8]
     if not search_string:
         search_string = b"This program cannot be run in DOS mode."
@@ -46,9 +44,9 @@ def get_xor(filename, search_string=False):
 
             if (offset > 0) and offset not in offset_list:
                 offset_list.append(offset)
-                f = open(filename, "rb")
-                f.seek(offset, 0)
-                data = f.read(39)
+                with open(filename, "rb") as f:
+                    f.seek(offset, 0)
+                    data = f.read(39)
                 if search_string not in data:
                     is_xored = True
 
@@ -63,11 +61,7 @@ def get_xor(filename, search_string=False):
 
     if is_xored or xorsearch_custom:
         return check
-    else:
-        return {}
-
-
-import re
+    return {}
 
 
 def get_antivm(filename):
@@ -90,8 +84,8 @@ def get_antivm(filename):
     with open(filename, "rb") as f:
         buf = f.read()
 
-        for trick in VM_Sign:
-            pos = buf.find(VM_Sign[trick])
+        for trick, byte_val in VM_Sign.items():
+            pos = buf.find(byte_val)
             if pos > -1:
                 result.update({"trick": trick, "offset": hex(pos)})
 
@@ -104,7 +98,7 @@ def path_to_file(filename, folder):
 
 
 def load_config(config_file):
-    with open(config_file) as conf:
+    with open(config_file, encoding="utf-8") as conf:
         data = json.load(conf)
     return data
 
@@ -128,7 +122,7 @@ def get_result(pe, filename):
             "antivm": get_antivm(filename),
             "xor": get_xor(filename),
             "packer": yara_check.yara_match_from_file(
-                path_to_file("peid.yara", "../signatures/yara_plugins/pe"), filename
+                path_to_file("peid.yar", "../signatures/yara_plugins/pe"), filename
             ),
             "crypto": yara_check.yara_match_from_file(
                 path_to_file("crypto_signatures.yar", "../signatures/yara_plugins/pe"),

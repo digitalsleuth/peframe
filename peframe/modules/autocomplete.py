@@ -6,7 +6,7 @@
 import readline
 
 
-class MyCompleter(object):  # Custom completer
+class MyCompleter:  # Custom completer
 
     def __init__(self, cmd_list):
         self.cmd_list = sorted(cmd_list)

@@ -8,7 +8,7 @@ def get_result(pe, strings_match):
         for lib in pe.DIRECTORY_ENTRY_IMPORT:
             for imp in lib.imports:
                 for alert in strings_match:
-                    if alert and imp.name != None:  # remove 'null'
+                    if alert and imp.name is not None:  # remove 'null'
                         if imp.name.decode("ascii").startswith(alert):
                             alerts.append(imp.name.decode("ascii"))
 

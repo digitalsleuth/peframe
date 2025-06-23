@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-import json
-import string
-import unicodedata
 from . import stringstat
 
 
@@ -12,7 +9,7 @@ def valid_ip(address):
     try:
         host_bytes = address.split(".")
         valid = [int(b) for b in host_bytes]
-        valid = [b for b in valid if b >= 0 and b <= 255]
+        valid = [b for b in valid if 0 <= b <= 255]
         return len(host_bytes) == 4 and len(valid) == 4
     except:
         return False
@@ -33,12 +30,13 @@ def get_result(filename, strings_match):
     fuzzing_list = strings_match["fuzzing"].items()
 
     # Strings analysis
-    for string in strings_list:
-        if len(string) < 2000:
+    for str_val in strings_list:
+        str_val = str_val.rstrip()
+        if len(str_val) < 2000:
             # URL list
             urllist = re.findall(
-                r"((smb|srm|ssh|ftps?|file|https?):((//)|(\\\\))+([\w\d:#@%/;$()~_?\+-=\\\.&](#!)?)*)",
-                string,
+                r"((smb|srm|ssh|ftps?|file|sftp|https?):((//)|(\\\\))+([\w\d:#@%/;$()~_?\+-=\\\.&](#!)?)*)",
+                str_val,
                 re.MULTILINE,
             )
             if urllist:
@@ -46,7 +44,7 @@ def get_result(filename, strings_match):
                     url_list.append(re.sub(r"\(|\)|;|,|\$", "", url[0]))
 
             # IP list
-            iplist = re.findall(r"[0-9]+(?:\.[0-9]+){3}", string, re.MULTILINE)
+            iplist = re.findall(r"[0-9]+(?:\.[0-9]+){3}", str_val, re.MULTILINE)
             if iplist:
                 for ip in iplist:
                     if valid_ip(str(ip)) and not re.findall(
@@ -55,19 +53,20 @@ def get_result(filename, strings_match):
                         ip_list.append(str(ip))
 
             # FILE list
+            file_pattern = r"(?<!\S)((?:[\w\-.\\/\[\]]{1,255}[\\/])*(?:[\w\[\]\-{}]+)?\.(?P<ext>[a-z0-9]{2,4}))(?!\S)"
             fname = re.findall(
-                "(.{1,260}(\.([a-z]{2,3}$)|\/.{1,260}\/|\\\.{1,260}\\\))+",
-                string,
+                file_pattern,
+                str_val,
                 re.IGNORECASE | re.MULTILINE,
             )
             if fname:
-                # print (fname)
                 for word in fname:
-                    file_list.append(word[0])
+                    if len(word[0]) > 5:
+                        file_list.append(word[0])
 
     # Purge list
-    ip_list = list(set([item for item in ip_list]))
-    url_list = list(set([item for item in url_list]))
+    ip_list = list(set(ip_list))
+    url_list = list(set(url_list))
 
     # Search for valid filename
     filetype_dict = {}
@@ -79,23 +78,24 @@ def get_result(filename, strings_match):
                     "\\" + ext + "$", str(file), re.IGNORECASE | re.MULTILINE
                 )
                 if match and file.lower() not in array_tmp and len(file) > 4:
-                    # print(match)
                     filetype_dict.update({file: key})
                     array_tmp.append(file.lower())
-
+        if file.lower() not in array_tmp:
+            filetype_dict.update({file: "Unknown"})
+            
     # Initialize fuzzing
     for key, value in fuzzing_list:
         fuzzing_dict[key] = []
 
     # Strings analysis for fuzzing
     array_tmp = []
-    for string in strings_list:
-        if len(string) < 256:
+    for str_val in strings_list:
+        if len(str_val) < 256:
             for key, value in fuzzing_list:
-                fuzz_match = re.findall(value, string, re.IGNORECASE | re.MULTILINE)
-                if fuzz_match and string.lower() not in array_tmp:
-                    fuzzing_dict[key].append(string)
-                    array_tmp.append(string.lower())
+                fuzz_match = re.findall(value, str_val, re.IGNORECASE | re.MULTILINE)
+                if fuzz_match and str_val.lower() not in array_tmp:
+                    fuzzing_dict[key].append(str_val)
+                    array_tmp.append(str_val.lower())
 
     # Remove empty key fuzzing
     for key, value in fuzzing_list:

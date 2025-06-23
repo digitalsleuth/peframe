@@ -6,18 +6,20 @@ build-backend = "setuptools.build_meta"
 exclude = ["debian*", "binaries*", "build*", "dist*"]
 
 [tool.setuptools.package-data]
-peframe = ['config/config-peframe.json','signatures/stringsmatch.json','signatures/yara_plugins/doc/*.yar','signatures/yara_plugins/pdf/*.yar','signatures/yara_plugins/pe/*.yar','signatures/yara_plugins/pe/*.yara']
+peframe = ['config/config-peframe.json','signatures/stringsmatch.json','signatures/yara_plugins/doc/*.yar','signatures/yara_plugins/doc/pdf/*.yar','signatures/yara_plugins/pe/*.yar']
 
 [project]
 name = "peframe-ds"
-version = "6.2.0"
+version = "7.0.0"
 dependencies = [
     "pefile",
-    "python-magic",
+    "readline ; platform_system != 'Windows'",
+    "pyreadline3 ; platform_system == 'Windows'",
+    "python-magic-bin ; platform_system == 'Windows'",
+    "python-magic ; platform_system != 'Windows'",
     "yara-python",
-    "virustotal-api",
     "oletools",
-    "M2Crypto"
+    "cryptography"
 ]
 requires-python = ">=3.8"
 authors = [

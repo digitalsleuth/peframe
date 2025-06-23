@@ -20,13 +20,15 @@ def yara_match_from_file(fileyara, filename):
     return matches
 
 
-def yara_match_from_folder(folder_yara, filename, exclude=[]):
+def yara_match_from_folder(folder_yara, filename, exclude=None):
     matches = []
+    if exclude is None:
+        exclude = []
     # for fileyara in yara_files:
-    for dirpath, dirnames, filenames in walk(folder_yara):
+    for dirpath, _, filenames in walk(folder_yara):
         for f in filenames:
             if str(f).endswith(".yar") and str(f) not in exclude:
-                path_to_file_yara = str(dirpath) + os.sep + str(f)
+                path_to_file_yara = f"{str(dirpath)}{os.sep}{str(f)}"
 
                 try:
                     rules = yara.compile(path_to_file_yara)

@@ -8,7 +8,7 @@ import re
 import sys
 import json
 import hashlib
-from datetime import datetime
+from datetime import datetime as dt, timezone
 import magic
 import pefile
 
@@ -39,11 +39,11 @@ else:
 
 
 def version():
-    return "6.2.0"
+    return "7.0.0"
 
 
 def get_datetime_now():
-    return datetime.now()
+    return dt.now()
 
 
 def isfile(filename):
@@ -128,7 +128,7 @@ def analyze(filename):
         "hashes": gethash(filename),
         "virustotal": virustotal.get_result(
             load_config(path_to_file("config-peframe.json", "config"))["virustotal"],
-            gethash(filename)["md5"],
+            gethash(filename)["sha256"],
         ),
         "strings": fileurl.get_result(
             filename, load_config(path_to_file("stringsmatch.json", "signatures"))
@@ -146,8 +146,8 @@ def analyze(filename):
         peinfo.update(
             {
                 "imphash": pe.get_imphash(),
-                "timestamp": datetime.utcfromtimestamp(
-                    pe.FILE_HEADER.TimeDateStamp
+                "timestamp": dt.fromtimestamp(
+                    pe.FILE_HEADER.TimeDateStamp, tz=timezone.utc
                 ).strftime("%Y-%m-%d %H:%M:%S"),
                 "dll": pe.FILE_HEADER.IMAGE_FILE_DLL,
                 "imagebase": pe.OPTIONAL_HEADER.ImageBase,
